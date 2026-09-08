@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Etiketten – Heim-WMS{% endblock %}
+{% block content %}
+<h1>Etiketten drucken</h1>
+<p>Wähle Lagerorte und/oder Artikel aus. Jedes Etikett enthält QR-Code, 1D-Barcode (Code128) und Klartext. Ohne Auswahl werden alle gedruckt.</p>
+
+<form method="get" action="{{ base_url(request) }}/labels/pdf" target="_blank">
+  <div style="display:flex; gap:2rem; flex-wrap:wrap;">
+    <div style="flex:1; min-width:250px;">
+      <h2 style="font-size:1.1rem;">Lagerorte</h2>
+      {% for loc in locations %}
+      <label style="display:block;"><input type="checkbox" name="loc" value="{{ loc.code }}"> {{ loc.code }} – {{ loc.name }}</label>
+      {% else %}<p>Keine Lagerorte.</p>{% endfor %}
+    </div>
+    <div style="flex:1; min-width:250px;">
+      <h2 style="font-size:1.1rem;">Artikel</h2>
+      {% for item in items %}
+      <label style="display:block;"><input type="checkbox" name="item" value="{{ item.code }}"> {{ item.code }} – {{ item.title }}</label>
+      {% else %}<p>Keine Artikel.</p>{% endfor %}
+    </div>
+  </div>
+  <p><button type="submit" class="btn btn-primary">PDF erzeugen</button>
+     <a class="btn" href="{{ base_url(request) }}/labels/commands/pdf" target="_blank">Kommando-Blatt</a></p>
+</form>
+{% endblock %}

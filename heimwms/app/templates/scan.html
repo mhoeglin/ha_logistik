@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Scan – Heim-WMS{% endblock %}
+{% block head_extra %}
+<style>
+  .scan-wrap { display: grid; grid-template-columns: 1fr; gap: 1rem; max-width: 640px; }
+  .status-card { background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.12); padding: 1rem; }
+  .status-card .mode { font-size: 1.3rem; font-weight: 700; }
+  .status-card .loc { font-size: 1.1rem; color: #1565c0; }
+  .msg { padding: .6rem .8rem; border-radius: 4px; margin-top: .6rem; font-weight: 500; }
+  .msg.ok { background: #c8e6c9; }
+  .msg.err { background: #ffcdd2; }
+  .mode-buttons { display: flex; gap: .5rem; flex-wrap: wrap; }
+  .mode-buttons button { flex: 1; min-width: 120px; }
+  .mode-buttons button:disabled { opacity: .5; cursor: not-allowed; }
+  #assigned li { padding: .3rem 0; border-bottom: 1px solid #eee; }
+  .hidden-input { position: absolute; left: -9999px; opacity: 0; }
+  .manual { display: flex; gap: .4rem; margin-top: .5rem; }
+  .manual input { flex: 1; padding: .4rem; }
+</style>
+{% endblock %}
+{% block content %}
+<h1>Scan – Einlagern</h1>
+<p>Scanne <strong>CMD:STORE</strong> (oder Button), dann den <strong>Lagerort</strong>, dann die <strong>Artikel</strong> nacheinander. Der Fokus liegt automatisch auf dem versteckten Scan-Feld.</p>
+
+<div class="scan-wrap">
+  <div class="status-card">
+    <div>Modus: <span class="mode" id="mode">–</span></div>
+    <div>Aktueller Ort: <span class="loc" id="location">–</span></div>
+    <div class="msg" id="message" style="display:none;"></div>
+  </div>
+
+  <div class="mode-buttons">
+    <button class="btn btn-primary" data-cmd="CMD:STORE">EINLAGERN</button>
+    <button class="btn" data-cmd="CMD:REMOVE" disabled title="später">Auslagern</button>
+    <button class="btn" data-cmd="CMD:MOVE" disabled title="später">Umzug</button>
+    <button class="btn" onclick="resetSession()">Zurücksetzen</button>
+  </div>
+
+  <div class="manual">
+    <input id="manual-code" placeholder="Code manuell eingeben (z.B. LOC:000001)">
+    <button class="btn" onclick="submitManual()">Senden</button>
+  </div>
+
+  <div class="status-card">
+    <h2 style="font-size:1rem; margin-top:0;">Zuletzt zugeordnet</h2>
+    <ul id="assigned" style="list-style:none; padding:0; margin:0;"><li>–</li></ul>
+  </div>
+</div>
+
+<input class="hidden-input" id="scan-input" autocomplete="off" aria-hidden="true">
+{% endblock %}
+{% block scripts %}
+<script src="{{ base_url(request) }}/static/scan_detector.js"></script>
+<script>
+const BASE = "{{ base_url(request) }}";
+const modeEl = document.getElementById('mode');
+const locEl = document.getElementById('location');
+const msgEl = document.getElementById('message');
+const assignedEl = document.getElementById('assigned');
+const hidden = document.getElementById('scan-input');
+let assignedItems = [];
+
+function showMessage(text, ok) {
+  msgEl.textContent = text;
+  msgEl.className = 'msg ' + (ok ? 'ok' : 'err');
+  msgEl.style.display = 'block';
+}
+
+function render(result) {
+  modeEl.textContent = result.mode ? (result.mode === 'STORE' ? 'EINLAGERN' : result.mode) : '–';
+  locEl.textContent = result.location_name ? (result.location_name + ' (' + result.location_code + ')') : '–';
+  showMessage(result.message, result.ok);
+  if (result.ok && result.kind === 'item' && result.item_code) {
+    assignedItems.unshift((result.item_title || result.item_code) + ' → ' + (result.location_name || ''));
+    assignedItems = assignedItems.slice(0, 10);
+    assignedEl.innerHTML = assignedItems.map(x => '<li>' + x + '</li>').join('');
+  }
+}
+
+async function sendCode(code) {
+  if (!code) return;
+  try {
+    const resp = await fetch(BASE + '/scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: code })
+    });
+    const result = await resp.json();
+    render(result);
+  } catch (e) {
+    showMessage('Netzwerkfehler: ' + e, false);
+  }
+}
+
+async function resetSession() {
+  await fetch(BASE + '/scan/reset', { method: 'POST' });
+  modeEl.textContent = '–';
+  locEl.textContent = '–';
+  assignedItems = [];
+  assignedEl.innerHTML = '<li>–</li>';
+  showMessage('Sitzung zurückgesetzt.', true);
+  focusHidden();
+}
+
+function submitManual() {
+  const inp = document.getElementById('manual-code');
+  sendCode(inp.value.trim());
+  inp.value = '';
+  focusHidden();
+}
+
+document.querySelectorAll('.mode-buttons button[data-cmd]').forEach(b => {
+  b.addEventListener('click', () => sendCode(b.getAttribute('data-cmd')));
+});
+
+// Keyboard-wedge detection on the hidden input.
+const detector = createScanDetector({ onScan: sendCode, timeoutMs: 50 });
+function focusHidden() { hidden.focus(); }
+hidden.addEventListener('keydown', (e) => {
+  const code = detector.handleKey(e);
+  if (e.key === 'Enter') e.preventDefault();
+});
+// Keep focus on the hidden input unless the user is typing in the manual box.
+document.addEventListener('click', (e) => {
+  if (e.target.id !== 'manual-code') focusHidden();
+});
+window.addEventListener('load', focusHidden);
+</script>
+{% endblock %}

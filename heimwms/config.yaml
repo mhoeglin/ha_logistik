@@ -1,0 +1,22 @@
+name: "Heim-WMS"
+version: "0.1.0"
+slug: "heimwms"
+description: "Persönliche Lagerverwaltung: Lagerorte/Artikel, QR+1D-Etiketten, Scan-Einlagern."
+url: "local"
+arch:
+  - amd64
+  - aarch64
+  - armv7
+init: false
+ingress: true
+ingress_port: 8000
+panel_icon: mdi:warehouse
+panel_title: "Heim-WMS"
+ports:
+  8000/tcp: 8099
+ports_description:
+  8000/tcp: "Web-UI (optional direkter Zugriff; Ingress funktioniert ohne)"
+options:
+  seed_demo_data: false
+schema:
+  seed_demo_data: bool

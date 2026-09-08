@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Übersicht – Heim-WMS{% endblock %}
+{% block content %}
+<h1>Übersicht – Was ist wo?</h1>
+
+<form class="inline" method="get" action="{{ base_url(request) }}/overview/search">
+  <label>Artikel suchen (Code oder Titel)
+    <input name="q" placeholder="z.B. Bücher oder ITM:000001">
+  </label>
+  <button type="submit" class="btn btn-primary">Suchen</button>
+</form>
+
+{% for entry in data %}
+  <h2 style="font-size:1.15rem;">{{ entry.location.code }} – {{ entry.location.name }}</h2>
+  {% if entry.placed %}
+  <table>
+    <thead><tr><th>Code</th><th>Titel</th></tr></thead>
+    <tbody>
+      {% for it in entry.placed %}
+      <tr><td><a href="{{ base_url(request) }}/overview/item/{{ it.code }}">{{ it.code }}</a></td><td>{{ it.title }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:#777;">– leer –</p>
+  {% endif %}
+{% else %}
+  <p>Noch keine Lagerorte angelegt.</p>
+{% endfor %}
+
+{% if unplaced %}
+<h2 style="font-size:1.15rem;">Ohne Lagerort</h2>
+<table>
+  <thead><tr><th>Code</th><th>Titel</th></tr></thead>
+  <tbody>
+    {% for it in unplaced %}
+    <tr><td><a href="{{ base_url(request) }}/overview/item/{{ it.code }}">{{ it.code }}</a></td><td>{{ it.title }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

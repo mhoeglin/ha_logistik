@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} – Übersicht{% endblock %}
+{% block content %}
+<p><a href="{{ base_url(request) }}/overview">&larr; Übersicht</a></p>
+{% if item %}
+<h1>{{ item.title }} <small style="color:#666;">{{ item.code }}</small></h1>
+<p><strong>Aktueller Standort:</strong>
+  {% if location %}{{ location.name }} ({{ location.code }}){% else %}<em>kein aktiver Standort</em>{% endif %}
+</p>
+
+<h2 style="font-size:1.1rem;">Historie</h2>
+{% if history %}
+<table>
+  <thead><tr><th>Zeit</th><th>Aktion</th><th>Von</th><th>Nach</th></tr></thead>
+  <tbody>
+    {% for h in history %}
+    <tr>
+      <td>{{ h.ts.strftime("%Y-%m-%d %H:%M") }}</td>
+      <td>{{ h.action.value }}</td>
+      <td>{{ h.from_location or "–" }}</td>
+      <td>{{ h.to_location or "–" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Keine Bewegungen erfasst.</p>
+{% endif %}
+{% else %}
+<h1>Artikel nicht gefunden</h1>
+<p>Kein Artikel mit Code <code>{{ code }}</code>.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ item.title }} – Heim-WMS{% endblock %}
+{% block content %}
+<p><a href="{{ base_url(request) }}/items">&larr; Alle Artikel</a></p>
+<h1>{{ item.title }} <small style="color:#666;">{{ item.code }}</small></h1>
+<p><strong>Typ:</strong> {{ item.type.value if item.type else "" }}</p>
+{% if item.description %}<p><strong>Beschreibung:</strong> {{ item.description }}</p>{% endif %}
+
+<h2 style="font-size:1.1rem;">Inhalt</h2>
+{% if contents %}
+<table>
+  <thead><tr><th>Inhalt</th><th>Menge</th></tr></thead>
+  <tbody>
+  {% for c in contents %}
+    <tr><td>{{ c.text }}</td><td>{{ c.quantity }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Keine Inhaltsliste hinterlegt.</p>
+{% endif %}
+
+<h2 style="font-size:1.1rem;">Fotos</h2>
+{% if photos %}
+<div style="display:flex; gap:.6rem; flex-wrap:wrap;">
+  {% for p in photos %}
+  <img src="{{ base_url(request) }}/photos/{{ p.id }}" alt="Foto" style="max-width:220px; border:1px solid #ccc; border-radius:4px;">
+  {% endfor %}
+</div>
+{% else %}
+<p>Kein Foto hinterlegt.</p>
+{% endif %}
+{% endblock %}

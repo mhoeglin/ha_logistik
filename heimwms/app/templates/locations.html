@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Lagerorte – Heim-WMS{% endblock %}
+{% block content %}
+<h1>Lagerorte</h1>
+
+<form class="inline" method="post" action="{{ base_url(request) }}/locations">
+  <label>Name *
+    <input name="name" required placeholder="z.B. Keller Regal A">
+  </label>
+  <label>Beschreibung
+    <input name="description" placeholder="optional">
+  </label>
+  <label>Übergeordneter Ort
+    <select name="parent_code">
+      <option value="">– keiner –</option>
+      {% for loc in locations %}
+      <option value="{{ loc.code }}">{{ loc.code }} – {{ loc.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button type="submit" class="btn btn-primary">Anlegen</button>
+</form>
+
+<table>
+  <thead>
+    <tr><th>Code</th><th>Name</th><th>Beschreibung</th><th>Übergeordnet</th></tr>
+  </thead>
+  <tbody>
+  {% for loc in locations %}
+    <tr>
+      <td>{{ loc.code }}</td>
+      <td>{{ loc.name }}</td>
+      <td>{{ loc.description or "–" }}</td>
+      <td>{{ loc.parent_code or "–" }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="4">Noch keine Lagerorte angelegt.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

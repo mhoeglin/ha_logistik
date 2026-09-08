@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Artikel – Heim-WMS{% endblock %}
+{% block content %}
+<h1>Artikel / Kartons</h1>
+
+<form class="inline" method="post" action="{{ base_url(request) }}/items" enctype="multipart/form-data" style="flex-direction:column; align-items:stretch; max-width:520px;">
+  <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+    <label style="flex:1;">Titel *
+      <input name="title" required placeholder="z.B. Winterjacken">
+    </label>
+    <label>Typ
+      <select name="type">
+        {% for t in item_types %}
+        <option value="{{ t.value }}">{{ t.value }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </div>
+  <label>Beschreibung
+    <input name="description" placeholder="optional">
+  </label>
+
+  <fieldset style="border:1px solid #ccc; border-radius:4px; padding:.5rem;">
+    <legend style="font-size:.8rem;">Inhalt (optional)</legend>
+    <div id="content-rows">
+      <div class="content-row" style="display:flex; gap:.4rem; margin-bottom:.3rem;">
+        <input name="content_text" placeholder="Inhalt" style="flex:1;">
+        <input name="content_qty" placeholder="Menge" value="1" style="width:70px;">
+      </div>
+    </div>
+    <button type="button" class="btn" onclick="addRow()">+ Zeile</button>
+  </fieldset>
+
+  <label>Foto (optional)
+    <input type="file" name="photo" accept="image/*">
+  </label>
+
+  <button type="submit" class="btn btn-primary">Anlegen</button>
+</form>
+
+<table>
+  <thead><tr><th>Code</th><th>Titel</th><th>Typ</th><th>Beschreibung</th></tr></thead>
+  <tbody>
+  {% for item in items %}
+    <tr>
+      <td><a href="{{ base_url(request) }}/items/{{ item.code }}">{{ item.code }}</a></td>
+      <td>{{ item.title }}</td>
+      <td>{{ item.type.value if item.type else "" }}</td>
+      <td>{{ item.description or "–" }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="4">Noch keine Artikel angelegt.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<script>
+function addRow() {
+  const rows = document.getElementById('content-rows');
+  const div = document.createElement('div');
+  div.className = 'content-row';
+  div.style = 'display:flex; gap:.4rem; margin-bottom:.3rem;';
+  div.innerHTML = '<input name="content_text" placeholder="Inhalt" style="flex:1;">' +
+                  '<input name="content_qty" placeholder="Menge" value="1" style="width:70px;">';
+  rows.appendChild(div);
+}
+</script>
+{% endblock %}
