@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Hilfe / Abläufe – Heim-WMS{% endblock %}
+{% block head_extra %}
+<style>
+  .uc { background:#fff; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,.12); padding:1rem 1.2rem; margin-bottom:1.4rem; }
+  .uc h2 { margin-top:0; font-size:1.15rem; }
+  .badge { font-size:.7rem; font-weight:700; padding:.15rem .5rem; border-radius:10px; vertical-align:middle; margin-left:.5rem; }
+  .badge.ok { background:#c8e6c9; color:#1b5e20; }
+  .badge.plan { background:#ffe0b2; color:#e65100; }
+  .legend { background:#fff; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,.12); padding:.8rem 1.2rem; margin-bottom:1.4rem; }
+  .legend code { background:#eef; padding:.05rem .3rem; border-radius:3px; }
+  .mermaid { overflow-x:auto; }
+  .intro { color:#444; }
+</style>
+{% endblock %}
+{% block content %}
+<h1>Abläufe &amp; Scan-Prozeduren</h1>
+<p class="intro">
+  Prinzip: Du scannst zuerst ein <strong>Kommando</strong> (vom Kommando-Blatt),
+  dann bei Bedarf einen <strong>Lagerort</strong>, dann die <strong>Artikel</strong>.
+  Jeder Ort hat nur <strong>einen</strong> Aufkleber; die Aktionen liegen einmal
+  global auf dem Kommando-Blatt.
+</p>
+
+<div class="legend">
+  <strong>Code-Typen:</strong>
+  <code>CMD:…</code> Kommando (Aktion) ·
+  <code>LOC:xxxxxx</code> Lagerort ·
+  <code>ITM:xxxxxx</code> Artikel/Karton<br>
+  <strong>Orts-Richtung (geplant):</strong> normal (rein/raus) ·
+  Senke (nur rein, z.B. Mülleimer) · Quelle (nur raus, z.B. Neukauf-Eingang)
+</div>
+
+<div class="uc">
+  <h2>1. Einlagern <span class="badge ok">aktiv</span></h2>
+  <p>Kommando <code>CMD:STORE</code> → Ort → Artikel nacheinander.</p>
+  <pre class="mermaid">
+flowchart LR
+  A["Scan CMD:STORE"] --> B["Scan Lagerort LOC:…"]
+  B --> C["Scan Artikel ITM:…"]
+  C --> C
+  C --> D["Zuordnung + Historie<br/>in der DB"]
+  </pre>
+</div>
+
+<div class="uc">
+  <h2>2. Auslagern <span class="badge plan">geplant</span></h2>
+  <p>Artikel verlässt seinen Ort, bleibt aber erhalten (Status „ausgelagert").</p>
+  <pre class="mermaid">
+flowchart LR
+  A["Scan CMD:REMOVE"] --> B["Scan Artikel ITM:…"]
+  B --> B
+  B --> C["Aktiver Standort entfernt<br/>Status: ausgelagert<br/>Historie: REMOVE"]
+  </pre>
+</div>
+
+<div class="uc">
+  <h2>3. Umzug (Ort → Ort) <span class="badge plan">geplant</span></h2>
+  <p>Neuer Zielort, dann die Kisten – jede wird dem neuen Ort zugeordnet.</p>
+  <pre class="mermaid">
+flowchart LR
+  A["Scan CMD:MOVE"] --> B["Scan neuer Ort LOC:…"]
+  B --> C["Scan Artikel ITM:…"]
+  C --> C
+  C --> D["Alter Standort inaktiv<br/>neuer Standort aktiv<br/>Historie: MOVE"]
+  </pre>
+</div>
+
+<div class="uc">
+  <h2>4. Ausleihen / Zurückgeben <span class="badge plan">geplant</span></h2>
+  <p>Werkzeug verlässt das Lager (ausgeliehen) und kommt später zurück.</p>
+  <pre class="mermaid">
+flowchart LR
+  subgraph Ausleihen
+    A1["Scan CMD:LEND"] --> A2["Scan Artikel ITM:…"]
+    A2 --> A3["Status: ausgeliehen<br/>(optional: an wen)"]
+  end
+  subgraph Zurückgeben
+    B1["Scan CMD:RETURN"] --> B2["Scan Artikel ITM:…"]
+    B2 --> B3["Status: verfügbar<br/>zurück am Ort"]
+  end
+  </pre>
+</div>
+
+<div class="uc">
+  <h2>5. Wegwerfen (Senke) &amp; Neukauf (Quelle) <span class="badge plan">geplant</span></h2>
+  <p>
+    Ein <strong>Mülleimer</strong> ist ein Ort mit nur einer Richtung (Senke):
+    was hier eingelagert wird, gilt als entsorgt. Ein <strong>Neukauf-Eingang</strong>
+    ist eine Quelle: von hier entsteht neuer Bestand.
+  </p>
+  <pre class="mermaid">
+flowchart LR
+  subgraph Wegwerfen
+    W1["Scan CMD:STORE"] --> W2["Scan Ort = Senke<br/>(z.B. LOC Mülleimer)"]
+    W2 --> W3["Scan Artikel ITM:…"]
+    W3 --> W4["Status: entsorgt<br/>kein aktiver Standort<br/>Historie: DISPOSE"]
+  end
+  subgraph Neukauf
+    N1["Artikel anlegen ITM:…"] --> N2["Scan CMD:STORE"]
+    N2 --> N3["Scan normaler Ort LOC:…"]
+    N3 --> N4["Status: eingelagert<br/>Historie: ACQUIRE/STORE"]
+  end
+  </pre>
+</div>
+
+<div class="uc">
+  <h2>Zustände eines Artikels (Überblick) <span class="badge plan">geplant</span></h2>
+  <pre class="mermaid">
+stateDiagram-v2
+  [*] --> Eingelagert: STORE (an Ort)
+  Eingelagert --> Ausgelagert: REMOVE
+  Ausgelagert --> Eingelagert: STORE
+  Eingelagert --> Ausgeliehen: LEND
+  Ausgeliehen --> Eingelagert: RETURN
+  Eingelagert --> Entsorgt: STORE in Senke (Mülleimer)
+  Ausgelagert --> Entsorgt: STORE in Senke
+  Entsorgt --> [*]
+  </pre>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ base_url(request) }}/static/vendor/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+</script>
+{% endblock %}

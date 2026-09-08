@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.3
+
+- Neue Seite **Hilfe / Abläufe**: visuelle Prozess-Diagramme (Mermaid) für die
+  Use Cases Einlagern, Auslagern, Umzug, Ausleihen/Zurückgeben sowie
+  Wegwerfen (Senke/Mülleimer) und Neukauf (Quelle). Enthält auch ein
+  Zustandsdiagramm eines Artikels. Mermaid ist lokal eingebettet (funktioniert
+  offline über Ingress). Noch nicht implementierte Aktionen sind als „geplant"
+  gekennzeichnet.
+
 ## 0.1.2
 
 - `CHANGELOG.md` ergänzt (HA zeigt Änderungsnotizen beim Update statt

@@ -52,13 +52,14 @@ def create_app() -> FastAPI:
         base = request.headers.get("X-Ingress-Path", "")
         return RedirectResponse(url=f"{base}/locations")
 
-    from app.routers import items, labels, locations, overview, scan
+    from app.routers import help, items, labels, locations, overview, scan
 
     app.include_router(locations.router)
     app.include_router(items.router)
     app.include_router(labels.router)
     app.include_router(scan.router)
     app.include_router(overview.router)
+    app.include_router(help.router)
 
     return app
 
