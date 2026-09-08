@@ -1,4 +1,4 @@
 build_from:
-  amd64: "ghcr.io/hassio-addons/base:17.2.4"
-  aarch64: "ghcr.io/hassio-addons/base:17.2.4"
-  armv7: "ghcr.io/hassio-addons/base:17.2.4"
+  amd64: "python:3.12-slim-bookworm"
+  aarch64: "python:3.12-slim-bookworm"
+  armv7: "python:3.12-slim-bookworm"
