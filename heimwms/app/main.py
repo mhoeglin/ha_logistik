@@ -17,6 +17,17 @@ async def lifespan(app: FastAPI):
         init_db()
     except Exception:  # pragma: no cover - db module may not exist yet
         pass
+
+    # Optional demo seeding, controlled by env (used by the HA add-on option).
+    import os
+
+    if os.getenv("HEIMWMS_SEED", "").strip().lower() in {"1", "true", "yes", "on"}:
+        try:
+            from scripts.seed import main as seed_main
+
+            seed_main()
+        except Exception as exc:  # pragma: no cover - seeding is best-effort
+            print(f"[heimwms] seeding skipped/failed: {exc}")
     yield
 
 
