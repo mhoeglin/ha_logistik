@@ -26,10 +26,40 @@ def utcnow() -> datetime:
 
 
 class ItemType(str, Enum):
-    box = "box"
-    food = "food"
-    tool = "tool"
-    other = "other"
+    karton = "karton"
+    kiste = "kiste"
+    werkzeug = "werkzeug"
+    lebensmittel = "lebensmittel"
+    material = "material"
+
+    @property
+    def label(self) -> str:
+        return {
+            "karton": "Karton",
+            "kiste": "Kiste",
+            "werkzeug": "Werkzeug",
+            "lebensmittel": "Lebensmittel",
+            "material": "Material",
+        }[self.value]
+
+    @classmethod
+    def _missing_(cls, value):
+        # Backwards compatibility: map legacy English values to the new ones.
+        legacy = {
+            "box": cls.karton,
+            "food": cls.lebensmittel,
+            "tool": cls.werkzeug,
+            "other": cls.material,
+        }
+        if isinstance(value, str):
+            v = value.strip().lower()
+            if v in legacy:
+                return legacy[v]
+            # also accept German labels / capitalised input
+            for member in cls:
+                if v == member.value or v == member.label.lower():
+                    return member
+        return None
 
 
 class LocationDirection(str, Enum):
@@ -81,7 +111,7 @@ class Item(SQLModel, table=True):
     code: str = Field(primary_key=True, description="e.g. ITM:000123")
     title: str
     description: Optional[str] = None
-    type: ItemType = Field(default=ItemType.box)
+    type: ItemType = Field(default=ItemType.karton)
     status: ItemStatus = Field(default=ItemStatus.stored, index=True)
     lent_to: Optional[str] = None
     created_at: datetime = Field(default_factory=utcnow)

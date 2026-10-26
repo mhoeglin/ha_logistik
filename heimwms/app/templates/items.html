@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Artikel – Heim-WMS{% endblock %}
 {% block content %}
-<h1>Artikel / Kartons</h1>
+<h1>Artikel</h1>
 
 <form class="inline" method="post" action="{{ base_url(request) }}/items" enctype="multipart/form-data" style="flex-direction:column; align-items:stretch; max-width:520px;">
   <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
@@ -11,7 +11,7 @@
     <label>Typ
       <select name="type">
         {% for t in item_types %}
-        <option value="{{ t.value }}">{{ t.value }}</option>
+        <option value="{{ t.value }}">{{ t.label }}</option>
         {% endfor %}
       </select>
     </label>
@@ -45,7 +45,7 @@
     <tr>
       <td><a href="{{ base_url(request) }}/items/{{ item.code }}">{{ item.code }}</a></td>
       <td>{{ item.title }}</td>
-      <td>{{ item.type.value if item.type else "" }}</td>
+      <td>{{ item.type.label if item.type else "" }}</td>
       <td>{{ item.description or "–" }}</td>
     </tr>
   {% else %}

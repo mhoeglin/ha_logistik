@@ -36,6 +36,31 @@ def init_db() -> None:
     engine = get_engine()
     SQLModel.metadata.create_all(engine)
     _migrate_add_columns(engine)
+    _migrate_item_type_values(engine)
+
+
+# Legacy -> current item.type value mapping (v0.1 English -> v0.2 German).
+_ITEM_TYPE_RENAMES: dict[str, str] = {
+    "box": "karton",
+    "food": "lebensmittel",
+    "tool": "werkzeug",
+    "other": "material",
+}
+
+
+def _migrate_item_type_values(engine: Engine) -> None:
+    """Rewrite legacy English item.type values to the current German ones."""
+    from sqlalchemy import text
+
+    with engine.begin() as conn:
+        rows = conn.exec_driver_sql("PRAGMA table_info(item)").fetchall()
+        if not rows:
+            return  # table doesn't exist yet
+        for old, new in _ITEM_TYPE_RENAMES.items():
+            conn.execute(
+                text("UPDATE item SET type = :new WHERE type = :old"),
+                {"new": new, "old": old},
+            )
 
 
 # (table, column, DDL type + default) — additive, idempotent migrations.

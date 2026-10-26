@@ -37,7 +37,7 @@ class ContentLine(BaseModel):
 class ItemCreate(BaseModel):
     title: str
     description: Optional[str] = None
-    type: ItemType = ItemType.box
+    type: ItemType = ItemType.karton
     contents: list[ContentLine] = []
 
 
@@ -135,7 +135,7 @@ async def html_create_item(
     request: Request,
     title: str = Form(...),
     description: str = Form(""),
-    type: str = Form("box"),
+    type: str = Form("karton"),
     content_text: list[str] = Form(default=[]),
     content_qty: list[str] = Form(default=[]),
     photo: UploadFile | None = File(default=None),
@@ -153,7 +153,7 @@ async def html_create_item(
     try:
         item_type = ItemType(type)
     except ValueError:
-        item_type = ItemType.box
+        item_type = ItemType.karton
 
     item = create_item(
         session,

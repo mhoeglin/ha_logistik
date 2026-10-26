@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0
+
+- Artikel-Typen überarbeitet: **Karton, Kiste, Werkzeug, Lebensmittel,
+  Material** (statt der bisherigen englischen Werte box/food/tool/other). Die
+  Auswahl und Anzeige erfolgt mit deutschen Bezeichnungen. Bestehende
+  Datenbanken werden beim Start automatisch migriert (box→Karton,
+  food→Lebensmittel, tool→Werkzeug, other→Material); alte Werte werden auch
+  bei der Eingabe weiterhin akzeptiert und zugeordnet.
+
 ## 0.2.0
 
 - Fix: Nach dem Anlegen eines Lagerorts bzw. Artikels führte die Weiterleitung

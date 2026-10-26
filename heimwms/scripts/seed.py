@@ -46,11 +46,11 @@ def main() -> None:
                 ),
             )
 
-        i1 = mk("Bücher – Romane", "box", [("Taschenbücher", 20), ("Hardcover", 8)])
-        i2 = mk("Winterkleidung", "box", [("Jacken", 4), ("Handschuhe", 6)])
-        i3 = mk("Werkzeug – Elektro", "tool", [("Bohrmaschine", 1), ("Bits-Set", 1)])
-        i4 = mk("Weihnachtsdeko", "box", [("Lichterketten", 3)])
-        i5 = mk("Konserven-Vorrat", "food", [("Tomaten", 12), ("Bohnen", 8)])
+        i1 = mk("Bücher – Romane", "karton", [("Taschenbücher", 20), ("Hardcover", 8)])
+        i2 = mk("Winterkleidung", "kiste", [("Jacken", 4), ("Handschuhe", 6)])
+        i3 = mk("Werkzeug – Elektro", "werkzeug", [("Bohrmaschine", 1), ("Bits-Set", 1)])
+        i4 = mk("Weihnachtsdeko", "karton", [("Lichterketten", 3)])
+        i5 = mk("Konserven-Vorrat", "lebensmittel", [("Tomaten", 12), ("Bohnen", 8)])
         print(f"[seed] Artikel angelegt: {i1.code}, {i2.code}, {i3.code}, {i4.code}, {i5.code}")
 
         # --- Ein paar davon direkt einlagern (STORE-Workflow) ---
