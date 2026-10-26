@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Lagerort bearbeiten – Heim-WMS{% endblock %}
+{% block head_extra %}
+<style>
+  .btn-secondary { background: #e0e0e0; color: #222; text-decoration: none; display: inline-block; }
+  .btn-secondary:hover { background: #cfcfcf; }
+</style>
+{% endblock %}
+{% block content %}
+<h1>Lagerort bearbeiten</h1>
+
+<p><strong>Code:</strong> {{ loc.code }} <small>(nicht änderbar)</small></p>
+
+<form class="inline" method="post"
+      action="{{ base_url(request) }}/locations/{{ loc.code }}/edit"
+      style="flex-direction:column; align-items:stretch; max-width:520px;">
+  <label>Name *
+    <input name="name" required value="{{ loc.name }}">
+  </label>
+  <label>Beschreibung
+    <input name="description" value="{{ loc.description or '' }}" placeholder="optional">
+  </label>
+  <label>Übergeordneter Ort
+    <select name="parent_code">
+      <option value="">– keiner –</option>
+      {% for other in locations %}
+      <option value="{{ other.code }}" {% if other.code == loc.parent_code %}selected{% endif %}>
+        {{ other.code }} – {{ other.name }}
+      </option>
+      {% endfor %}
+    </select>
+  </label>
+  <div style="display:flex; gap:.5rem; margin-top:.6rem;">
+    <button type="submit" class="btn btn-primary">Speichern</button>
+    <a class="btn btn-secondary" href="{{ base_url(request) }}/locations">Abbrechen</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,7 +1,22 @@
 {% extends "base.html" %}
 {% block title %}Lagerorte – Heim-WMS{% endblock %}
+{% block head_extra %}
+<style>
+  .btn-secondary { background: #e0e0e0; color: #222; text-decoration: none; display: inline-block; }
+  .btn-secondary:hover { background: #cfcfcf; }
+  .btn-danger { background: #c62828; color: #fff; }
+  .btn-danger:hover { background: #8e0000; }
+  .btn-sm { padding: .25rem .6rem; font-size: .8rem; }
+  td.actions { white-space: nowrap; }
+  td.actions form { display: inline; margin: 0; }
+</style>
+{% endblock %}
 {% block content %}
 <h1>Lagerorte</h1>
+
+{% if error %}
+<div class="flash err">{{ error }}</div>
+{% endif %}
 
 <form class="inline" method="post" action="{{ base_url(request) }}/locations">
   <label>Name *
@@ -23,7 +38,7 @@
 
 <table>
   <thead>
-    <tr><th>Code</th><th>Name</th><th>Beschreibung</th><th>Übergeordnet</th></tr>
+    <tr><th>Code</th><th>Name</th><th>Beschreibung</th><th>Übergeordnet</th><th>Aktionen</th></tr>
   </thead>
   <tbody>
   {% for loc in locations %}
@@ -32,9 +47,18 @@
       <td>{{ loc.name }}</td>
       <td>{{ loc.description or "–" }}</td>
       <td>{{ loc.parent_code or "–" }}</td>
+      <td class="actions">
+        <a class="btn btn-secondary btn-sm"
+           href="{{ base_url(request) }}/locations/{{ loc.code }}/edit">Bearbeiten</a>
+        <form method="post"
+              action="{{ base_url(request) }}/locations/{{ loc.code }}/delete"
+              onsubmit="return confirm('Lagerort {{ loc.code }} – {{ loc.name }} wirklich löschen?');">
+          <button type="submit" class="btn btn-danger btn-sm">Löschen</button>
+        </form>
+      </td>
     </tr>
   {% else %}
-    <tr><td colspan="4">Noch keine Lagerorte angelegt.</td></tr>
+    <tr><td colspan="5">Noch keine Lagerorte angelegt.</td></tr>
   {% endfor %}
   </tbody>
 </table>

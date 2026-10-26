@@ -1,12 +1,22 @@
 # Changelog
 
-## 0.1.4
+## 0.2.0
 
 - Fix: Nach dem Anlegen eines Lagerorts bzw. Artikels führte die Weiterleitung
-  zu „404: Not Found" hinter Home-Assistant-Ingress. Die POST-Handler leiteten
-  auf absolute Pfade (`/locations`, `/items/...`) ohne den Ingress-Prefix um.
-  Die Redirects berücksichtigen jetzt den `X-Ingress-Path`-Header (konsistent
-  mit der Startseiten-Weiterleitung).
+  hinter Home-Assistant-Ingress zu „404: Not Found". Die POST-Handler leiten
+  jetzt mit dem `X-Ingress-Path`-Präfix um (konsistent mit der Startseite).
+- Lagerorte: **Bearbeiten**- und **Löschen**-Funktion direkt in der Tabelle.
+  Bearbeiten über eigene Seite (Name, Beschreibung, übergeordneter Ort);
+  Löschen mit Sicherheitsabfrage. Schutzregeln: ein Ort mit Unter-Orten oder
+  noch eingelagerten Artikeln kann nicht gelöscht werden; Zyklen bei der
+  Übergeordnet-Zuordnung werden verhindert. Dazu REST-Endpunkte
+  `PUT`/`DELETE /api/locations/{code}`.
+- Scan: **Auslagern** (CMD:REMOVE), **Umzug** (CMD:MOVE), **Ausleihen**
+  (CMD:LEND) und **Zurückgeben** (CMD:RETURN) sind jetzt in der Oberfläche
+  nutzbar (zuvor nur „geplant"). Umzug kann auch durch erneutes Einlagern am
+  neuen Ort erfolgen. Artikel tragen einen Status (eingelagert/ausgelagert/
+  ausgeliehen/entsorgt); Einlagern in einen als Senke markierten Ort
+  (z.B. Mülleimer) entsorgt den Artikel.
 
 ## 0.1.3
 

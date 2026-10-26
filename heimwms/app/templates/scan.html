@@ -19,8 +19,11 @@
 </style>
 {% endblock %}
 {% block content %}
-<h1>Scan – Einlagern</h1>
-<p>Scanne <strong>CMD:STORE</strong> (oder Button), dann den <strong>Lagerort</strong>, dann die <strong>Artikel</strong> nacheinander. Der Fokus liegt automatisch auf dem versteckten Scan-Feld.</p>
+<h1>Scan</h1>
+<p>Kommando wählen (Button oder <strong>CMD:…</strong> scannen), dann je nach Aktion den <strong>Lagerort</strong> und die <strong>Artikel</strong> scannen.
+<strong>Einlagern/Umzug/Zurückgeben:</strong> erst Lagerort, dann Artikel.
+<strong>Auslagern/Ausleihen:</strong> direkt die Artikel (kein Lagerort nötig).
+Der Fokus liegt automatisch auf dem versteckten Scan-Feld.</p>
 
 <div class="scan-wrap">
   <div class="status-card">
@@ -31,8 +34,10 @@
 
   <div class="mode-buttons">
     <button class="btn btn-primary" data-cmd="CMD:STORE">EINLAGERN</button>
-    <button class="btn" data-cmd="CMD:REMOVE" disabled title="später">Auslagern</button>
-    <button class="btn" data-cmd="CMD:MOVE" disabled title="später">Umzug</button>
+    <button class="btn" data-cmd="CMD:REMOVE">Auslagern</button>
+    <button class="btn" data-cmd="CMD:MOVE">Umzug</button>
+    <button class="btn" data-cmd="CMD:LEND">Ausleihen</button>
+    <button class="btn" data-cmd="CMD:RETURN">Zurückgeben</button>
     <button class="btn" onclick="resetSession()">Zurücksetzen</button>
   </div>
 
@@ -67,11 +72,15 @@ function showMessage(text, ok) {
 }
 
 function render(result) {
-  modeEl.textContent = result.mode ? (result.mode === 'STORE' ? 'EINLAGERN' : result.mode) : '–';
+  const modeLabels = {
+    'STORE': 'EINLAGERN', 'MOVE': 'UMZUG', 'RETURN': 'ZURÜCKGEBEN',
+    'REMOVE': 'AUSLAGERN', 'LEND': 'AUSLEIHEN'
+  };
+  modeEl.textContent = result.mode ? (modeLabels[result.mode] || result.mode) : '–';
   locEl.textContent = result.location_name ? (result.location_name + ' (' + result.location_code + ')') : '–';
   showMessage(result.message, result.ok);
   if (result.ok && result.kind === 'item' && result.item_code) {
-    assignedItems.unshift((result.item_title || result.item_code) + ' → ' + (result.location_name || ''));
+    assignedItems.unshift(result.message);
     assignedItems = assignedItems.slice(0, 10);
     assignedEl.innerHTML = assignedItems.map(x => '<li>' + x + '</li>').join('');
   }

@@ -1,7 +1,7 @@
 name: "Heim-WMS"
-version: "0.1.4"
+version: "0.2.0"
 slug: "heimwms"
-description: "Persönliche Lagerverwaltung: Lagerorte/Artikel, QR+1D-Etiketten, Scan-Einlagern."
+description: "Persönliche Lagerverwaltung: Lagerorte/Artikel, QR+1D-Etiketten, Scan (Ein-/Auslagern, Umzug, Ausleihen)."
 url: "https://github.com/mhoeglin/ha_logistik"
 arch:
   - amd64

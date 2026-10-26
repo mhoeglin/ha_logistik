@@ -32,12 +32,34 @@ class ItemType(str, Enum):
     other = "other"
 
 
+class LocationDirection(str, Enum):
+    """Whether a location accepts items in, out, or both.
+
+    - normal: bidirectional (store and remove).
+    - sink: incoming only; storing here disposes the item (e.g. Mülleimer).
+    - source: outgoing only; items originate here (e.g. Neukauf-Eingang).
+    """
+
+    normal = "normal"
+    sink = "sink"
+    source = "source"
+
+
+class ItemStatus(str, Enum):
+    stored = "stored"        # currently placed at an active location
+    removed = "removed"      # taken out, still exists, no active location
+    lent = "lent"            # lent out (optionally to someone)
+    disposed = "disposed"    # discarded / gone
+
+
 class Action(str, Enum):
     STORE = "STORE"
     REMOVE = "REMOVE"
     MOVE = "MOVE"
     LEND = "LEND"
     RETURN = "RETURN"
+    DISPOSE = "DISPOSE"      # store into a sink location
+    ACQUIRE = "ACQUIRE"      # first placement / from a source
 
 
 class Location(SQLModel, table=True):
@@ -46,6 +68,7 @@ class Location(SQLModel, table=True):
     code: str = Field(primary_key=True, description="e.g. LOC:000123")
     name: str
     description: Optional[str] = None
+    direction: LocationDirection = Field(default=LocationDirection.normal)
     parent_code: Optional[str] = Field(
         default=None, foreign_key="location.code", index=True
     )
@@ -59,6 +82,8 @@ class Item(SQLModel, table=True):
     title: str
     description: Optional[str] = None
     type: ItemType = Field(default=ItemType.box)
+    status: ItemStatus = Field(default=ItemStatus.stored, index=True)
+    lent_to: Optional[str] = None
     created_at: datetime = Field(default_factory=utcnow)
 
 
