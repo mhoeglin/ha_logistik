@@ -132,6 +132,7 @@ def html_list_items(request: Request, session: Session = Depends(get_session)):
 
 @router.post("/items")
 async def html_create_item(
+    request: Request,
     title: str = Form(...),
     description: str = Form(""),
     type: str = Form("box"),
@@ -166,7 +167,8 @@ async def html_create_item(
     if photo is not None and photo.filename:
         save_photo(session, item.code, photo)
 
-    return RedirectResponse(url=f"/items/{item.code}", status_code=303)
+    base = request.headers.get("X-Ingress-Path", "")
+    return RedirectResponse(url=f"{base}/items/{item.code}", status_code=303)
 
 
 @router.get("/photos/{photo_id}")

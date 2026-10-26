@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.4
+
+- Fix: Nach dem Anlegen eines Lagerorts bzw. Artikels führte die Weiterleitung
+  zu „404: Not Found" hinter Home-Assistant-Ingress. Die POST-Handler leiteten
+  auf absolute Pfade (`/locations`, `/items/...`) ohne den Ingress-Prefix um.
+  Die Redirects berücksichtigen jetzt den `X-Ingress-Path`-Header (konsistent
+  mit der Startseiten-Weiterleitung).
+
 ## 0.1.3
 
 - Neue Seite **Hilfe / Abläufe**: visuelle Prozess-Diagramme (Mermaid) für die

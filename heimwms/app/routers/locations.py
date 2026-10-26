@@ -95,6 +95,7 @@ def html_list_locations(request: Request, session: Session = Depends(get_session
 
 @router.post("/locations")
 def html_create_location(
+    request: Request,
     name: str = Form(...),
     description: str = Form(""),
     parent_code: str = Form(""),
@@ -108,4 +109,5 @@ def html_create_location(
             parent_code=parent_code or None,
         ),
     )
-    return RedirectResponse(url="/locations", status_code=303)
+    base = request.headers.get("X-Ingress-Path", "")
+    return RedirectResponse(url=f"{base}/locations", status_code=303)
