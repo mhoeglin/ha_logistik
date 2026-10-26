@@ -1,5 +1,11 @@
 {% extends "base.html" %}
 {% block title %}{{ item.title }} – Heim-WMS{% endblock %}
+{% block head_extra %}
+<style>
+  .btn-danger { background: #c62828; color: #fff; }
+  .btn-danger:hover { background: #8e0000; }
+</style>
+{% endblock %}
 {% block content %}
 <p><a href="{{ base_url(request) }}/items">&larr; Alle Artikel</a></p>
 <h1>{{ item.title }} <small style="color:#666;">{{ item.code }}</small></h1>
@@ -30,4 +36,10 @@
 {% else %}
 <p>Kein Foto hinterlegt.</p>
 {% endif %}
+
+<form method="post" style="margin-top:1.5rem;"
+      action="{{ base_url(request) }}/items/{{ item.code }}/delete"
+      onsubmit="return confirm('Artikel {{ item.code }} – {{ item.title }} wirklich löschen? Inhaltsliste, Fotos und Historie werden mit entfernt.');">
+  <button type="submit" class="btn btn-danger">Artikel löschen</button>
+</form>
 {% endblock %}

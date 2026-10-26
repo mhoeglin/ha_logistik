@@ -14,14 +14,14 @@ from fastapi import (
     Request,
     UploadFile,
 )
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from pydantic import BaseModel
 from sqlmodel import Session, select
 
 from app.codes import format_item_code
 from app.config import settings
 from app.db import get_session
-from app.models import Item, ItemContent, ItemType, Photo
+from app.models import Item, ItemContent, ItemType, MovementLog, Photo, Placement
 from app.templates import templates
 
 router = APIRouter()
@@ -98,6 +98,43 @@ def save_photo(session: Session, item_code: str, upload: UploadFile) -> Photo:
     return photo
 
 
+def delete_item(session: Session, code: str) -> None:
+    """Delete an item and all its related data (contents, photos, placements,
+    movement history), including photo files on disk."""
+    item = session.get(Item, code)
+    if item is None:
+        raise HTTPException(status_code=404, detail="item not found")
+
+    # remove photo files from disk, then their rows
+    photos = session.exec(select(Photo).where(Photo.item_code == code)).all()
+    for ph in photos:
+        try:
+            p = Path(ph.path)
+            if p.exists():
+                p.unlink()
+        except OSError:
+            pass  # best-effort; still drop the DB row
+        session.delete(ph)
+
+    for content in session.exec(
+        select(ItemContent).where(ItemContent.item_code == code)
+    ).all():
+        session.delete(content)
+
+    for placement in session.exec(
+        select(Placement).where(Placement.item_code == code)
+    ).all():
+        session.delete(placement)
+
+    for log in session.exec(
+        select(MovementLog).where(MovementLog.item_code == code)
+    ).all():
+        session.delete(log)
+
+    session.delete(item)
+    session.commit()
+
+
 # ---- REST API ----
 
 @router.post("/api/items", response_model=ItemRead, status_code=201)
@@ -118,6 +155,12 @@ def api_get_item(code: str, session: Session = Depends(get_session)) -> Item:
     if item is None:
         raise HTTPException(status_code=404, detail="item not found")
     return item
+
+
+@router.delete("/api/items/{code}", status_code=204)
+def api_delete_item(code: str, session: Session = Depends(get_session)):
+    delete_item(session, code)
+    return Response(status_code=204)
 
 
 # ---- HTML GUI ----
@@ -197,3 +240,12 @@ def html_item_detail(
         "item_detail.html",
         {"item": item, "contents": contents, "photos": photos},
     )
+
+
+@router.post("/items/{code}/delete")
+def html_delete_item(
+    code: str, request: Request, session: Session = Depends(get_session)
+):
+    delete_item(session, code)
+    base = request.headers.get("X-Ingress-Path", "")
+    return RedirectResponse(url=f"{base}/items", status_code=303)

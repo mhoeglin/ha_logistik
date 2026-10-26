@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.1
+
+- Artikel: **Löschen**-Funktion. Button in der Artikel-Tabelle und auf der
+  Detailseite (mit Sicherheitsabfrage) sowie REST-Endpunkt
+  `DELETE /api/items/{code}`. Beim Löschen werden auch die Inhaltsliste, die
+  Fotos (inkl. der Bilddateien), aktive/alte Platzierungen und die
+  Bewegungshistorie des Artikels entfernt.
+
 ## 0.3.0
 
 - Artikel-Typen überarbeitet: **Karton, Kiste, Werkzeug, Lebensmittel,
