@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.2
+
+- Artikel-Foto: Das Foto-Feld öffnet auf dem Smartphone jetzt direkt die
+  (Rück-)Kamera (`capture="environment"`), statt den Galerie-/Dateidialog. Am
+  Desktop-Browser bleibt der normale Dateidialog erhalten.
+
 ## 0.3.1
 
 - Artikel: **Löschen**-Funktion. Button in der Artikel-Tabelle und auf der
